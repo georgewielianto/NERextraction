@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SportExtract - Ekstraksi Informasi Berita Olahraga</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .header h1 {
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      .badge {
+        display: inline-block;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .support-info {
+        display: flex;
+        gap: 30px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .support-category {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        flex: 1;
+        min-width: 250px;
+        max-width: 400px;
+      }
+
+      .category-title {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      .category-items {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .category-item {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.95),
+          rgba(255, 255, 255, 0.85)
+        );
+        color: #2c3e50;
+        padding: 8px 15px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+      }
+
+      .category-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      .category-item.sport {
+        border-left: 4px solid #667eea;
+      }
+
+      .category-item.media {
+        border-left: 4px solid #f39c12;
+      }
+
+      .item-icon {
+        font-size: 1.1rem;
+      }
+
+      /* Article Preview Section */
+      .article-preview {
+        max-width: 1200px;
+        margin: 0 auto 30px;
+        animation: slideIn 0.5s ease-out;
+        display: none;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .article-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .article-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+
+      .article-title {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+
+      .article-meta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .meta-item::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 50%;
+      }
+
+      .article-stats {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+      }
+
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .article-content {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        line-height: 1.8;
+        color: #2c3e50;
+        transition: max-height 0.3s ease;
+      }
+
+      .article-content.expanded {
+        max-height: none;
+      }
+
+      .article-content::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .article-content::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-radius: 4px;
+      }
+
+      .article-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 4px;
+      }
+
+      .article-content p {
+        margin-bottom: 15px;
+      }
+
+      .expand-button {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+      }
+
+      .expand-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .expand-button:active {
+        transform: translateY(0);
+      }
+
+      .article-tags {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .tag-item {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .input-section,
+      .output-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .input-tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-button {
+        flex: 1;
+        padding: 12px;
+        background: #f8f9fa;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #6c757d;
+      }
+
+      .tab-button.active {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+      }
+
+      .tab-button:hover:not(.active) {
+        background: #e9ecef;
+      }
+
+      .input-area {
+        margin-bottom: 20px;
+      }
+
+      .input-area textarea,
+      .input-area input[type="url"] {
+        width: 100%;
+        min-height: 200px;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: all 0.3s ease;
+      }
+
+      .input-area input[type="url"] {
+        min-height: auto;
+        height: 50px;
+      }
+
+      .input-area textarea:focus,
+      .input-area input[type="url"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .extract-button {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .extract-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+      }
+
+      .extract-button:active {
+        transform: translateY(0);
+      }
+
+      .w5h1-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .w5h1-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        padding: 20px;
+        border-left: 5px solid;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .w5h1-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .w5h1-item.who {
+        border-left-color: #e74c3c;
+      }
+      .w5h1-item.what {
+        border-left-color: #3498db;
+      }
+      .w5h1-item.when {
+        border-left-color: #f39c12;
+      }
+      .w5h1-item.where {
+        border-left-color: #2ecc71;
+      }
+      .w5h1-item.why {
+        border-left-color: #9b59b6;
+      }
+      .w5h1-item.how {
+        border-left-color: #1abc9c;
+      }
+
+      .w5h1-label {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .w5h1-item.who .w5h1-label {
+        color: #e74c3c;
+      }
+      .w5h1-item.what .w5h1-label {
+        color: #3498db;
+      }
+      .w5h1-item.when .w5h1-label {
+        color: #f39c12;
+      }
+      .w5h1-item.where .w5h1-label {
+        color: #2ecc71;
+      }
+      .w5h1-item.why .w5h1-label {
+        color: #9b59b6;
+      }
+      .w5h1-item.how .w5h1-label {
+        color: #1abc9c;
+      }
+
+      .w5h1-content {
+        color: #2c3e50;
+        line-height: 1.6;
+        min-height: 40px;
+        font-size: 0.95rem;
+      }
+
+      .entity-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 4px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .entity-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+      }
+
+      .entity-badge.atlet {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      }
+
+      .entity-badge.tim {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      }
+
+      .entity-badge.organisasi {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      }
+
+      .entity-badge.kewarganegaraan {
+        background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+      }
+
+      .entity-badge.posisi {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+      }
+
+      .entity-badge.umur {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      }
+
+      .entity-badge.penghargaan {
+        background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+      }
+
+      .entity-badge.statistik {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      }
+
+      .entity-badge.skor {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      }
+
+      .entity-badge.stadion {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      }
+
+      .entity-badge.kejuaraan {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      }
+
+      .entity-label {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+      }
+
+      .entity {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin: 2px;
+        display: inline-block;
+        box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .w5h1-container {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .article-title {
+          font-size: 1.4rem;
+        }
+
+        .article-meta {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .article-stats {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .support-info {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .support-category {
+          min-width: auto;
+        }
+        .footer-content {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .footer-logo:last-child {
+          display: none;
+        }
+
+        .advisor-names {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      .sample-data {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+      }
+
+      .sample-data h4 {
+        margin-bottom: 10px;
+        color: #495057;
+        font-size: 0.9rem;
+      }
+
+      .sample-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .sample-link {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.85rem;
+        padding: 5px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .sample-link:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .footer {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        margin-top: 40px;
+      }
+
+      .footer-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .footer-logo {
+        flex-shrink: 0;
+      }
+      .footer-logo img {
+        height: 80px;
+        width: auto;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        transition: all 0.3s ease;
+      }
+
+      .footer-logo img:hover {
+        transform: scale(1.08) translateY(-3px);
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35),
+          0 5px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .footer-info {
+        flex: 1;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      .footer-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .footer-developer {
+        font-size: 1rem;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .footer-developer strong {
+        color: #ffd700;
+        font-weight: 700;
+      }
+
+      .footer-program {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 15px;
+        line-height: 1.6;
+      }
+
+      .footer-advisors {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 12px 20px;
+        border-radius: 10px;
+        margin-top: 10px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .advisor-title {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .advisor-names {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .advisor-name {
+        font-size: 0.9rem;
+        color: white;
+        font-weight: 600;
+        padding: 5px 12px;
+        background: linear-gradient(
+          45deg,
+          rgba(255, 215, 0, 0.3),
+          rgba(255, 165, 0, 0.3)
+        );
+        border-radius: 20px;
+        border: 1px solid rgba(255, 215, 0, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🏆 SportExtract</h1>
+        <p>Sistem Ekstraksi Informasi Berita Olahraga Menggunakan IndoBERT</p>
+        <span class="badge">5W1H Extraction</span>
+
+        <div class="support-info">
+          <div class="support-category">
+            <div class="category-title">⚽ Kategori Olahraga</div>
+            <div class="category-items">
+              <span class="category-item sport">
+                <span class="item-icon">⚽</span>
+                <span>Sepakbola</span>
+              </span>
+              <span class="category-item sport">
+                <span class="item-icon">🏀</span>
+                <span>Basket</span>
+              </span>
+              <span class="category-item sport">
+                <span class="item-icon">🏸</span>
+                <span>Badminton</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="support-category">
+            <div class="category-title">📰 Media Online</div>
+            <div class="category-items">
+              <span class="category-item media">
+                <span class="item-icon"></span>
+                <span>DetikSport</span>
+              </span>
+              <span class="category-item media">
+                <span class="item-icon"></span>
+                <span>KompasSport</span>
+              </span>
+              <span class="category-item media">
+                <span class="item-icon"></span>
+                <span>BolaSport</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Article Preview Section (Hidden by default) -->
+      <div id="article-preview" class="article-preview">
+        <div class="article-card">
+          <div class="article-header">
+            <h3 class="article-title" id="article-title">Judul Artikel</h3>
+            <div class="article-meta">
+              <span class="meta-item" id="article-source">Sumber</span>
+              <span class="meta-item" id="article-date">Tanggal</span>
+            </div>
+          </div>
+          <div class="article-stats">
+            <div class="stat-item">
+              <span class="stat-value" id="word-count">0</span>
+              <span class="stat-label">Kata</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="char-count">0</span>
+              <span class="stat-label">Karakter</span>
+            </div>
+          </div>
+          <div class="article-content" id="article-content-preview">
+            <p>Konten artikel akan muncul di sini...</p>
+          </div>
+          <button
+            class="expand-button"
+            id="expand-button"
+            onclick="toggleArticleContent()"
+            style="display: none"
+          >
+            📖 Tampilkan Selengkapnya
+          </button>
+          <div class="article-tags" id="article-tags"></div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="input-section">
+          <h2 class="section-title">📝 Input Berita</h2>
+
+          <div class="input-tabs">
+            <button class="tab-button active" onclick="switchTab('text')">
+              Teks Berita
+            </button>
+            <button class="tab-button" onclick="switchTab('url')">
+              URL Berita
+            </button>
+          </div>
+
+          <div id="text-tab" class="tab-content active">
+            <div class="input-area">
+              <textarea
+                id="text-input"
+                placeholder="Masukkan teks berita olahraga di sini...
+
+Contoh:
+Lionel Messi mencetak gol spektakuler pada pertandingan Barcelona vs Real Madrid di Stadion Camp Nou kemarin malam. Pemain asal Argentina berusia 36 tahun ini berhasil mengalahkan kiper Thibaut Courtois dengan tendangan kaki kiri yang menawan. Gol tersebut menjadi gol ke-15 Messi di La Liga musim ini."
+              ></textarea>
+            </div>
+          </div>
+
+          <div id="url-tab" class="tab-content">
+            <div class="input-area">
+              <input
+                type="url"
+                id="url-input"
+                placeholder="https://sport.detik.com/sepakbola/..."
+              />
+              <div class="sample-data">
+                <h4>🔗 Contoh URL yang Didukung:</h4>
+                <div class="sample-links">
+                  <a
+                    href="#"
+                    class="sample-link"
+                    onclick="fillSampleUrl('detik'); return false;"
+                    >DetikSport - Berita Basket</a
+                  >
+                  <a
+                    href="#"
+                    class="sample-link"
+                    onclick="fillSampleUrl('kompas'); return false;"
+                    >Kompas.com - Berita SepakBola</a
+                  >
+                  <a
+                    href="#"
+                    class="sample-link"
+                    onclick="fillSampleUrl('bolasport'); return false;"
+                    >BolaSport - Berita Badminton</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="extract-button" onclick="extractInformation()">
+            🚀 Ekstrak Informasi
+          </button>
+        </div>
+
+        <div class="output-section">
+          <h2 class="section-title">📊 Hasil Ekstraksi 5W1H</h2>
+
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Sedang mengekstrak informasi...</p>
+          </div>
+
+          <div id="results" class="w5h1-container">
+            <div class="w5h1-item who">
+              <div class="w5h1-label">WHO (Siapa)</div>
+              <div class="w5h1-content" id="who-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+
+            <div class="w5h1-item what">
+              <div class="w5h1-label">WHAT (Apa)</div>
+              <div class="w5h1-content" id="what-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+
+            <div class="w5h1-item when">
+              <div class="w5h1-label">WHEN (Kapan)</div>
+              <div class="w5h1-content" id="when-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+
+            <div class="w5h1-item where">
+              <div class="w5h1-label">WHERE (Dimana)</div>
+              <div class="w5h1-content" id="where-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+
+            <div class="w5h1-item why">
+              <div class="w5h1-label">WHY (Mengapa)</div>
+              <div class="w5h1-content" id="why-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+
+            <div class="w5h1-item how">
+              <div class="w5h1-label">HOW (Bagaimana)</div>
+              <div class="w5h1-content" id="how-content">
+                Klik "Ekstrak Informasi" untuk melihat hasil
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <img
+              src="{{ url_for('static', filename='logo.svg.png') }}"
+              alt="UNTAR Logo"
+            />
+          </div>
+
+          <div class="footer-info">
+            <div class="footer-title">
+              🏆 SportExtract - Sistem Ekstraksi Informasi Berita Olahraga
+            </div>
+            <div class="footer-developer">
+              Dikembangkan oleh <strong>George Wielianto (535220090)</strong>
+            </div>
+            <div class="footer-program">
+              Program Studi Teknik Informatika<br />
+              Fakultas Teknologi Informasi - Universitas Tarumanagara
+            </div>
+
+            <div class="footer-advisors">
+              <div class="advisor-title">Pembimbing</div>
+              <div class="advisor-names">
+                <span class="advisor-name">Ir. Jeanny Pragantha, M.Eng.</span>
+                <span class="advisor-name"
+                  >Novario Jaya Perdana, S.Kom., M.T.</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-logo">
+            <img
+              src="{{ url_for('static', filename='logo.svg.png') }}"
+              alt="UNTAR Logo"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function switchTab(tabName) {
+        // Reset all tabs
+        document.querySelectorAll(".tab-button").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document.querySelectorAll(".tab-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // Activate selected tab
+        document
+          .querySelector(`button[onclick="switchTab('${tabName}')"]`)
+          .classList.add("active");
+        document.getElementById(`${tabName}-tab`).classList.add("active");
+      }
+
+      function fillSampleUrl(source) {
+        const sampleUrls = {
+          detik:
+            "https://sport.detik.com/basket/d-8020888/kandaskan-pelita-jaya-dewa-united-juara-ibl-2025",
+          kompas:
+            "https://bola.kompas.com/read/2025/10/02/06342688/skor-villarreal-vs-juventus-2-2-dua-bintang-bianconeri-sesali-hal-ini",
+          bolasport:
+            "https://www.bolasport.com/read/314308616/hasil-denmark-open-2025-putri-kw-digoreng-miyazaki-dengan-kesalahan-sendiri-tunggal-putri-indonesia-hancur-lebur",
+        };
+
+        document.getElementById("url-input").value = sampleUrls[source];
+      }
+
+      function extractInformation() {
+        const activeTab = document
+          .querySelector(".tab-button.active")
+          .textContent.includes("Teks")
+          ? "text"
+          : "url";
+        let input = "";
+
+        if (activeTab === "text") {
+          input = document.getElementById("text-input").value.trim();
+        } else {
+          input = document.getElementById("url-input").value.trim();
+        }
+
+        if (!input) {
+          alert("Mohon masukkan teks berita atau URL terlebih dahulu!");
+          return;
+        }
+
+        // Hide article preview when starting new extraction
+        document.getElementById("article-preview").style.display = "none";
+
+        // Show loading
+        document.getElementById("loading").classList.add("show");
+        document.getElementById("results").style.opacity = "0.3";
+
+        // Call actual API
+        callNERAPI(input);
+      }
+
+      async function callNERAPI(text) {
+        try {
+          const response = await fetch("/api/extract", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: text }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Display article preview if scraped data is available
+            if (data.scraped_data) {
+              displayArticlePreview(data.scraped_data);
+            }
+
+            displayResults(data.w5h1, data.entities, data.stats);
+          } else {
+            throw new Error(data.error || "Unknown error occurred");
+          }
+        } catch (error) {
+          console.error("Error calling API:", error);
+
+          // Extract error message
+          let errorMessage =
+            "Terjadi kesalahan saat memproses teks. Silakan coba lagi.";
+          if (error.message && error.message !== "Unknown error occurred") {
+            errorMessage = error.message;
+          }
+
+          alert(errorMessage);
+
+          // Hide loading on error
+          document.getElementById("loading").classList.remove("show");
+          document.getElementById("results").style.opacity = "1";
+        }
+      }
+
+      function displayArticlePreview(scrapedData) {
+        const previewSection = document.getElementById("article-preview");
+        const expandButton = document.getElementById("expand-button");
+        const contentPreview = document.getElementById(
+          "article-content-preview"
+        );
+
+        // Update article data
+        document.getElementById("article-title").textContent =
+          scrapedData.title || "Judul tidak tersedia";
+        document.getElementById("article-source").textContent =
+          scrapedData.source || "Sumber tidak diketahui";
+        document.getElementById("article-date").textContent =
+          scrapedData.date || "Tanggal tidak tersedia";
+        document.getElementById("word-count").textContent =
+          scrapedData.word_count || 0;
+        document.getElementById("char-count").textContent =
+          scrapedData.char_count || 0;
+
+        // Store full content in data attribute
+        contentPreview.setAttribute(
+          "data-full-content",
+          scrapedData.content || "Konten tidak tersedia"
+        );
+
+        // Update content preview - show full content now
+        if (scrapedData.content) {
+          // Split content into paragraphs
+          const paragraphs = scrapedData.content
+            .split("\n\n")
+            .filter((p) => p.trim().length > 0);
+          const formattedContent = paragraphs
+            .map((p) => `<p>${p}</p>`)
+            .join("");
+          contentPreview.innerHTML = formattedContent;
+
+          // Show expand button if content is long (more than 300px height)
+          setTimeout(() => {
+            if (contentPreview.scrollHeight > 300) {
+              expandButton.style.display = "block";
+              contentPreview.classList.remove("expanded");
+            } else {
+              expandButton.style.display = "none";
+            }
+          }, 100);
+        } else {
+          contentPreview.innerHTML = "<p>Konten tidak tersedia</p>";
+          expandButton.style.display = "none";
+        }
+
+        // Update tags
+        const tagsContainer = document.getElementById("article-tags");
+        tagsContainer.innerHTML = "";
+        if (scrapedData.tags && scrapedData.tags.length > 0) {
+          scrapedData.tags.forEach((tag) => {
+            const tagElement = document.createElement("span");
+            tagElement.className = "tag-item";
+            tagElement.textContent = tag;
+            tagsContainer.appendChild(tagElement);
+          });
+        }
+
+        // Show the preview section with animation
+        previewSection.style.display = "block";
+
+        // Scroll to the preview section
+        setTimeout(() => {
+          previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+
+      function toggleArticleContent() {
+        const contentPreview = document.getElementById(
+          "article-content-preview"
+        );
+        const expandButton = document.getElementById("expand-button");
+
+        if (contentPreview.classList.contains("expanded")) {
+          // Collapse
+          contentPreview.classList.remove("expanded");
+          expandButton.innerHTML = "📖 Tampilkan Selengkapnya";
+          contentPreview.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        } else {
+          // Expand
+          contentPreview.classList.add("expanded");
+          expandButton.innerHTML = "📕 Tampilkan Lebih Sedikit";
+        }
+      }
+
+      function displayResults(w5h1Data, entities, stats) {
+        // Hide loading
+        document.getElementById("loading").classList.remove("show");
+        document.getElementById("results").style.opacity = "1";
+
+        // Create entity label mapping untuk className
+        const entityLabelMapping = {
+          who: {
+            ATLET: "atlet",
+            TIM: "tim",
+            ORGANISASI: "organisasi",
+            KEWARGANEGARAAN: "kewarganegaraan",
+            POSISI: "posisi",
+            UMUR: "umur",
+          },
+          what: {
+            PENGHARGAAN: "penghargaan",
+            STATISTIK: "statistik",
+            SKOR: "skor",
+          },
+          where: {
+            STADION: "stadion",
+            KEJUARAAN: "kejuaraan",
+          },
+        };
+
+        // ============================================================
+        // PERBAIKAN: Ambil dari w5h1Data yang SUDAH DIGABUNG di backend
+        // Jangan proses ulang dari entities mentah!
+        // ============================================================
+
+        // Display WHO dengan badges - ambil dari w5h1Data['who']
+        const whoElement = document.getElementById("who-content");
+        if (w5h1Data.who && w5h1Data.who.length > 0) {
+          // Group by label type dari entities untuk mendapatkan label yang benar
+          const whoByLabel = {};
+
+          entities.forEach((entity) => {
+            entity.labels.forEach((label) => {
+              if (entityLabelMapping.who[label]) {
+                if (!whoByLabel[label]) {
+                  whoByLabel[label] = new Set();
+                }
+                whoByLabel[label].add(entity.text);
+              }
+            });
+          });
+
+          // Create badges dari w5h1Data (sudah digabung)
+          let badgesHTML = "";
+
+          // Untuk setiap item di w5h1Data.who, cari label yang cocok
+          w5h1Data.who.forEach((combinedText) => {
+            // Cari label yang paling cocok dengan combinedText
+            let matchedLabel = null;
+            let matchedClassName = null;
+
+            for (const [label, texts] of Object.entries(whoByLabel)) {
+              // Check if any text from this label is contained in combinedText
+              for (const text of texts) {
+                if (combinedText.includes(text)) {
+                  matchedLabel = label;
+                  matchedClassName = entityLabelMapping.who[label];
+                  break;
+                }
+              }
+              if (matchedLabel) break;
+            }
+
+            // Default jika tidak ada yang cocok
+            if (!matchedClassName) matchedClassName = "atlet";
+            if (!matchedLabel) matchedLabel = "ATLET";
+
+            badgesHTML += `<span class="entity-badge ${matchedClassName}">
+        ${combinedText}
+        <span class="entity-label">${matchedLabel}</span>
+      </span>`;
+          });
+
+          whoElement.innerHTML = badgesHTML;
+        } else {
+          whoElement.innerHTML = "Tidak ada informasi yang ditemukan";
+        }
+
+        // Display WHAT dengan badges - ambil dari w5h1Data['what']
+        const whatElement = document.getElementById("what-content");
+        if (w5h1Data.what && w5h1Data.what.length > 0) {
+          // Group by label type
+          const whatByLabel = {};
+
+          entities.forEach((entity) => {
+            entity.labels.forEach((label) => {
+              if (entityLabelMapping.what[label]) {
+                if (!whatByLabel[label]) {
+                  whatByLabel[label] = new Set();
+                }
+                whatByLabel[label].add(entity.text);
+              }
+            });
+          });
+
+          let badgesHTML = "";
+
+          w5h1Data.what.forEach((combinedText) => {
+            let matchedLabel = null;
+            let matchedClassName = null;
+
+            for (const [label, texts] of Object.entries(whatByLabel)) {
+              for (const text of texts) {
+                if (combinedText.includes(text)) {
+                  matchedLabel = label;
+                  matchedClassName = entityLabelMapping.what[label];
+                  break;
+                }
+              }
+              if (matchedLabel) break;
+            }
+
+            if (!matchedClassName) matchedClassName = "statistik";
+            if (!matchedLabel) matchedLabel = "STATISTIK";
+
+            badgesHTML += `<span class="entity-badge ${matchedClassName}">
+        ${combinedText}
+        <span class="entity-label">${matchedLabel}</span>
+      </span>`;
+          });
+
+          whatElement.innerHTML = badgesHTML;
+        } else {
+          whatElement.innerHTML = "Tidak ada informasi yang ditemukan";
+        }
+
+        // Display WHERE dengan badges - ambil dari w5h1Data['where']
+        const whereElement = document.getElementById("where-content");
+        if (w5h1Data.where && w5h1Data.where.length > 0) {
+          // Group by label type
+          const whereByLabel = {};
+
+          entities.forEach((entity) => {
+            entity.labels.forEach((label) => {
+              if (entityLabelMapping.where[label]) {
+                if (!whereByLabel[label]) {
+                  whereByLabel[label] = new Set();
+                }
+                whereByLabel[label].add(entity.text);
+              }
+            });
+          });
+
+          let badgesHTML = "";
+
+          w5h1Data.where.forEach((combinedText) => {
+            let matchedLabel = null;
+            let matchedClassName = null;
+
+            for (const [label, texts] of Object.entries(whereByLabel)) {
+              for (const text of texts) {
+                if (combinedText.includes(text)) {
+                  matchedLabel = label;
+                  matchedClassName = entityLabelMapping.where[label];
+                  break;
+                }
+              }
+              if (matchedLabel) break;
+            }
+
+            if (!matchedClassName) matchedClassName = "stadion";
+            if (!matchedLabel) matchedLabel = "STADION";
+
+            badgesHTML += `<span class="entity-badge ${matchedClassName}">
+        ${combinedText}
+        <span class="entity-label">${matchedLabel}</span>
+      </span>`;
+          });
+
+          whereElement.innerHTML = badgesHTML;
+        } else {
+          whereElement.innerHTML = "Tidak ada informasi yang ditemukan";
+        }
+
+        // Display WHEN, WHY, HOW as sentences (unchanged)
+        ["when", "why", "how"].forEach((category) => {
+          const content = w5h1Data[category]
+            .map((entity) => `<span class="entity">${entity}</span>`)
+            .join(" ");
+
+          const element = document.getElementById(`${category}-content`);
+          if (element) {
+            element.innerHTML = content || "Tidak ada informasi yang ditemukan";
+          }
+        });
+
+        // Add animation effect
+        document.querySelectorAll(".w5h1-item").forEach((item, index) => {
+          setTimeout(() => {
+            item.style.animation = "none";
+            item.style.animation = "pulse 0.6s ease-in-out";
+          }, index * 100);
+        });
+
+        // Log stats to console
+        console.log("Extraction Stats:", stats);
+        console.log("Raw Entities:", entities);
+        console.log("W5H1 Data (Already Combined):", w5h1Data);
+      }
+
+      // Add pulse animation
+      const style = document.createElement("style");
+      style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>
