@@ -4,12 +4,12 @@ SportExtract adalah sebuah aplikasi berbasis website yang dirancang untuk melaku
 Model NER yang digunakan pada penelitian ini adalah IndoBERT, yang telah terbukti efektif pada perancangan ini dalam memahami konteks bahasa Indonesia.
 
 # Tech Stack
-Python
-PyTorch
-Hugging Face Transformers
-IndoBERT
-Flask
-HTML, CSS
+- Python
+- PyTorch
+- Hugging Face Transformers
+- IndoBERT
+- Flask
+- HTML & CSS
 
 # Model yang Digunakan
 - Model: indobenchmark/indobert-base-p1
